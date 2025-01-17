@@ -1,0 +1,33 @@
+#!/bin/sh                                                                                                                                                                                                                                    
+
+# This script adds "Reboot" and "Shutdown" menu entries to GRUB.                                                                                                                                                                             
+# Make executable by running sudo chmod +x /etc/grub.d/40_reboot_shutdown
+# Place in /etc/grub.d
+
+set -e
+
+prefix="/usr"
+exec_prefix="/usr"
+datarootdir="/usr/share"
+
+export TEXTDOMAIN=grub
+export TEXTDOMAINDIR="${datarootdir}/locale"
+
+. "$pkgdatadir/grub-mkconfig_lib"
+
+
+LABEL_REBOOT="Reboot"
+LABEL_SHUTDOWN="Shutdown"
+
+gettext_printf "Adding boot menu entries for Reboot and Shutdown ...\n" >&2
+
+# Output the menu entries                                                                                                                                                                                                                    
+cat << EOF                                                                                                                                                                                                                                   
+menuentry '$(gettext "$LABEL_REBOOT")' \$menuentry_id_option 'Reboot' {                                                                                                                                                                      
+    reboot                                                                                                                                                                                                                                   
+}                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                             
+menuentry '$(gettext "$LABEL_SHUTDOWN")' \$menuentry_id_option 'Shutdown' {                                                                                                                                                                  
+    halt                                                                                                                                                                                                                                     
+}                                                                                                                                                                                                                                            
+EOF                                        
