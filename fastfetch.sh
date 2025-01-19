@@ -1,11 +1,28 @@
 #!/bin/bash
 
+# Script Name: fastfetch.sh
+# Copyright (C) 2025 darkexplosiveqwx
+# Last updated: 19. January 2025
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 # Initialize variables for options
 CREATE_AUTOSTART=false
 REMOVE_AUTOSTART=false
 SKIP_DEPENDENCY_CHECK=false
 FORCE_REINSTALL=false
-HELP_MESSAGE=false
 
 # Function to display help message
 function show_help {
