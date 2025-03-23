@@ -21,13 +21,15 @@ LABEL_SHUTDOWN="Shutdown"
 
 gettext_printf "Adding boot menu entries for Reboot and Shutdown ...\n" >&2
 
-# Output the menu entries                                                                                                                                                                                                                    
-cat << EOF                                                                                                                                                                                                                                   
-menuentry '$(gettext "$LABEL_REBOOT")' \$menuentry_id_option 'Reboot' {                                                                                                                                                                      
-    reboot                                                                                                                                                                                                                                   
-}                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                             
-menuentry '$(gettext "$LABEL_SHUTDOWN")' \$menuentry_id_option 'Shutdown' {                                                                                                                                                                  
-    halt                                                                                                                                                                                                                                     
-}                                                                                                                                                                                                                                            
-EOF                                        
+# Output the menu entries
+cat << EOF
+
+menuentry '$(gettext "$LABEL_REBOOT")' \$menuentry_id_option 'Reboot' {
+    reboot
+}
+
+menuentry '$(gettext "$LABEL_SHUTDOWN")' \$menuentry_id_option 'Shutdown' {
+    halt
+}
+
+EOF
