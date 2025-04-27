@@ -210,28 +210,28 @@ else
 fi
 
 # Detect if Dependencies are available
-if command -v curl &> /dev/null && command -v wget &> /dev/null && command -v jq &> /dev/null; then
+if command -v curl &> /dev/null && command -v jq &> /dev/null; then
     echo "Dependencies are already installed."
 else
-    echo "Dependencies missing, attempting to install curl, wget, jq..."
+    echo "Dependencies missing, attempting to install curl, jq..."
 
     # Update the package list and attempt to install missing dependencies
     $UPDATE_CMD
 
     if [ "$PACKAGE_MANAGER" == "apt-get" ] || [ "$PACKAGE_MANAGER" == "apt" ]; then
-        sudo $PACKAGE_MANAGER install -y curl wget jq
+        sudo $PACKAGE_MANAGER install -y curl jq
     elif [ "$PACKAGE_MANAGER" == "dnf" ] || [ "$PACKAGE_MANAGER" == "yum" ]; then
-        sudo $PACKAGE_MANAGER install -y curl wget jq
+        sudo $PACKAGE_MANAGER install -y curl jq
     else
         echo "Package manager not recognized for installing dependencies."
         exit 1
     fi
 
     # Check if the dependencies were successfully installed
-    if command -v curl &> /dev/null && command -v wget &> /dev/null && command -v jq &> /dev/null; then
+    if command -v curl &> /dev/null && command -v jq &> /dev/null; then
         echo "Dependencies installed successfully."
     else
-        echo "Unable to install curl, wget, or jq."
+        echo "Unable to install curl or jq."
         exit 1
     fi
 fi
@@ -259,7 +259,8 @@ if [ -f "$PACKAGE_FILE" ]; then
 fi
 
 # Download the correct package based on the detected architecture and package type
-wget "https://github.com/fastfetch-cli/fastfetch/releases/download/$VERSION/$PACKAGE_FILE"
+# Use cURL with a simple progress bar instead of wget to minimize dependencies
+curl -# -O "https://github.com/fastfetch-cli/fastfetch/releases/download/$VERSION/$PACKAGE_FILE"
 
 # Install the package
 $INSTALL_CMD "$PACKAGE_FILE"
