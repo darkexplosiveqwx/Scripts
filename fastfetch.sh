@@ -166,30 +166,44 @@ if ! ping -c 1 -q github.com &>/dev/null; then
 fi
 
 # Detect package manager (Debian/Ubuntu vs. RPM-based)
-if command -v apt-get &> /dev/null; then
+if command -v dpkg &> /dev/null; then
     # Debian/Ubuntu-based systems (use .deb)
-    PACKAGE_MANAGER="apt-get"
     PACKAGE_TYPE="deb"
     PACKAGE_FILE="fastfetch-linux-$ARCHITECTURE.deb"
-    INSTALL_CMD="sudo ${PACKAGE_MANAGER} -i"
-    UPDATE_CMD="sudo ${PACKAGE_MANAGER} update"
-
+    INSTALL_CMD="sudo dpkg -i"
+    
+    # Detect if apt-get is available
+    if command -v apt-get &> /dev/null; then
+        FIX_CMD="sudo apt-get install -f"
+        UPDATE_CMD="sudo apt-get update"
+        PACKAGE_MANAGER="apt-get"
+    elif command -v apt &> /dev/null; then
+        FIX_CMD="sudo apt install -f"
+        UPDATE_CMD="sudo apt update"
+        PACKAGE_MANAGER="apt"
+    else
+        echo "Neither apt-get nor apt is available. Unable to fix dependencies."
+        exit 1
+    fi
 elif command -v rpm &> /dev/null; then
+    # RPM-based systems (use .rpm)
+    PACKAGE_TYPE="rpm"
+    PACKAGE_FILE="fastfetch-linux-$ARCHITECTURE.rpm"
+    INSTALL_CMD="sudo rpm -i"
+    
     # Detect if dnf or yum are available
     if command -v dnf &> /dev/null; then
+        FIX_CMD="sudo dnf install -f"
+        UPDATE_CMD="sudo dnf check-update"
         PACKAGE_MANAGER="dnf"
     elif command -v yum &> /dev/null; then
+        FIX_CMD="sudo yum install -f"
+        UPDATE_CMD="sudo yum check-update"
         PACKAGE_MANAGER="yum"
     else
         echo "Neither yum nor dnf are available. Unable to fix dependencies."
         exit 1
     fi
-    # RPM-based systems (use .rpm)
-    PACKAGE_TYPE="rpm"
-    PACKAGE_FILE="fastfetch-linux-$ARCHITECTURE.rpm"
-    INSTALL_CMD="sudo ${PACKAGE_MANAGER} -i"
-    UPDATE_CMD="sudo ${PACKAGE_MANAGER} check-update"
-
 else
     echo "Unsupported package manager"
     exit 1
@@ -204,10 +218,10 @@ else
     # Update the package list and attempt to install missing dependencies
     $UPDATE_CMD
 
-    if [ "$PACKAGE_MANAGER" == "apt-get" ]; then
-        sudo $INSTALL_CMD -y curl jq
+    if [ "$PACKAGE_MANAGER" == "apt-get" ] || [ "$PACKAGE_MANAGER" == "apt" ]; then
+        sudo $PACKAGE_MANAGER install -y curl jq
     elif [ "$PACKAGE_MANAGER" == "dnf" ] || [ "$PACKAGE_MANAGER" == "yum" ]; then
-        sudo $INSTALL_CMD -y curl jq
+        sudo $PACKAGE_MANAGER install -y curl jq
     else
         echo "Package manager not recognized for installing dependencies."
         exit 1
@@ -248,11 +262,14 @@ fi
 # Use cURL with a simple progress bar instead of wget to minimize dependencies
 curl -# -O "https://github.com/fastfetch-cli/fastfetch/releases/download/$VERSION/$PACKAGE_FILE"
 
+# Install the package
+$INSTALL_CMD "$PACKAGE_FILE"
+
 # Update package list (for RPM-based systems, the update step is different)
 $UPDATE_CMD
 
-# Install the package
-$INSTALL_CMD "$PACKAGE_FILE"
+# Fix any missing dependencies if necessary (use the appropriate command for RPM-based systems)
+$FIX_CMD
 
 # Optionally, remove the package file after installation
 rm "$PACKAGE_FILE"
