@@ -242,8 +242,8 @@ VERSION=$(curl --silent "https://api.github.com/repos/fastfetch-cli/fastfetch/re
 
 # Get the local version of fastfetch if installed
 if command -v fastfetch &> /dev/null; then
-  # Extract the version number from the `fastfetch -v` output
-  LOCAL_VERSION=$(fastfetch -v | awk '{print $2}')
+  # fastfetch --version-raw prints just the verion number
+  LOCAL_VERSION=$(fastfetch --version-raw)
   # Compare local version with the latest version
   if [ "$LOCAL_VERSION" == "$VERSION" ] && ! $FORCE_REINSTALL; then
     echo "fastfetch is already up-to-date (version $LOCAL_VERSION). Exiting."
