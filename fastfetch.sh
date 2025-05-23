@@ -260,7 +260,7 @@ fi
 
 # Download the correct package based on the detected architecture and package type
 # Use cURL with a simple progress bar instead of wget to minimize dependencies
-curl -# -O "https://github.com/fastfetch-cli/fastfetch/releases/download/$VERSION/$PACKAGE_FILE"
+curl -OL# "https://github.com/fastfetch-cli/fastfetch/releases/download/$VERSION/$PACKAGE_FILE"
 
 # Install the package
 $INSTALL_CMD "$PACKAGE_FILE"
