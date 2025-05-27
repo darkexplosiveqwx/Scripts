@@ -1,6 +1,6 @@
-#!/bin/sh                                                                                                                                                                                                                                    
+#!/bin/sh
 
-# This script adds "Reboot" and "Shutdown" menu entries to GRUB.                                                                                                                                                                             
+# This script adds "Reboot" and "Shutdown" menu entries to GRUB.
 # Make executable by running sudo chmod +x /etc/grub.d/40_reboot_shutdown
 # Place in /etc/grub.d
 
