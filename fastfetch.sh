@@ -19,8 +19,6 @@
 
 
 # Initialize variables for options
-CREATE_AUTOSTART=false
-REMOVE_AUTOSTART=false
 SKIP_DEPENDENCY_CHECK=false
 FORCE_REINSTALL=false
 
@@ -29,8 +27,6 @@ function show_help {
   echo "Usage: $0 [options]"
   echo "Options:"
   echo "  -f    Skip Dependency check"
-  echo "  -c    Create Scheduled Symlink"
-  echo "  -r    Remove Scheduled Symlink"
   echo "  -i    Force reinstallation of fastfetch"
   echo "  -h    Show this help message"
 }
@@ -41,12 +37,6 @@ while getopts ":fcri" opt; do
   case $opt in
     f)
       SKIP_DEPENDENCY_CHECK=true
-      ;;
-    c)
-      CREATE_AUTOSTART=true
-      ;;
-    r)
-      REMOVE_AUTOSTART=true
       ;;
     i)
       FORCE_REINSTALL=true
@@ -70,78 +60,9 @@ done
 
 # Ensure the script runs as root
 if [ "$EUID" -ne 0 ]; then
-    echo "This script must be run as root. Re-running with sudo..."
-    exec sudo "$0" "$@"
-    exit
+    echo "This script must be run as root."
+    exit 1
 fi
-
-# Function to add the script to boot and Sunday night
-add_script_links() {
-    local script_path=$(readlink -f "$0")  # Absolute path to this script
-    local service_name="fastfetch_update.service"
-
-    # Create a systemd service file
-    cat > /etc/systemd/system/$service_name <<EOL
-[Unit]
-Description=Run fastfetch update script
-After=network.target
-
-[Service]
-ExecStart=$script_path
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOL
-
-    # Enable the service at boot
-    systemctl enable "$service_name"
-
-    # Schedule a timer for Sunday night at 11:59 PM
-    local timer_name="fastfetch_update.timer"
-    cat > /etc/systemd/system/$timer_name <<EOL
-[Unit]
-Description=Timer for fastfetch update on Sunday night
-
-[Timer]
-OnCalendar=Sun 23:59
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOL
-
-    # Enable and start the timer
-    systemctl enable "$timer_name"
-    systemctl start "$timer_name"
-
-    echo "Service and timer created for fastfetch_update."
-}
-
-remove_script_links() {
-    local service_name="fastfetch_update.service"
-    local timer_name="fastfetch_update.timer"
-
-    # Stop the timer and service
-    systemctl stop "$timer_name" "$service_name"
-
-    # Disable the timer and service
-    systemctl disable "$timer_name" "$service_name"
-
-    # Remove the service and timer files
-    rm -f "/etc/systemd/system/$service_name" "/etc/systemd/system/$timer_name"
-
-    echo "Service and timer removed for fastfetch_update."
-}
-
-if [ "$CREATE_AUTOSTART" = true ]; then
-    add_script_links
-    exit 0
-elif [ "$REMOVE_AUTOSTART" = true ]; then
-    remove_script_links
-    exit 0
-fi
-
 
 # Detect architecture
 ARCHITECTURE=$(uname -m)
